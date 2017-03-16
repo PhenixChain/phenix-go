@@ -1,0 +1,102 @@
+---
+- project:
+    name: fabric-jobs-power
+    jobs:
+      - 'fabric-merge-power-{arch}'
+      - 'fabric-verify-power-{arch}'
+
+    project: 'fabric'
+    arch:
+      - 'ppc64le'
+
+# gerrit changes
+
+- job-template:
+    name: 'fabric-verify-power-{arch}'
+
+    project-type: freestyle
+    node: 'hyp-fabric-power'
+    concurrent: true
+
+    logrotate:
+      daysToKeep: 30
+      artifactDaysToKeep: 30
+
+    properties:
+      - 'fabric-{arch}'
+
+    parameters:
+      - project-parameter:
+          project: '{project}'
+      - gerrit-parameter:
+          branch: 'master'
+      - gerrit-refspec-parameter:
+          refspec: ''
+
+    scm:
+      - hyperledger-fabric-gerrit:
+          credentials-id: 'hyperledger-jobbuilder'
+
+    triggers:
+      - gerrit-trigger-patch-submitted-silent:
+          name: '{project}'
+          branch: ''
+
+    wrappers:
+      - hyperledger-infra-wrappers
+
+    builders:
+      - clean-environment
+      - output-environment
+      - fabric-unit-tests
+
+    publishers:
+      - hyperledger-infra-shiplogs:
+          maven-version: 'mvn33'
+      - code-coverage-report
+
+- job-template:
+    name: 'fabric-merge-power-{arch}'
+
+    project-type: freestyle
+    node: 'hyp-fabric-power'
+    concurrent: true
+
+    properties:
+      - 'fabric-{arch}'
+
+    logrotate:
+      daysToKeep: 30
+      numToKeep: 40
+      artifactDaysToKeep: 10
+      artifactNumToKeep: 10
+
+    parameters:
+      - project-parameter:
+          project: '{project}'
+      - gerrit-parameter:
+          branch: 'master'
+      - gerrit-refspec-parameter:
+          refspec: ''
+
+    scm:
+      - hyperledger-fabric-gerrit:
+          credentials-id: 'hyperledger-jobbuilder'
+
+    triggers:
+      - gerrit-trigger-patch-merged-silent:
+          name: '{project}'
+          branch: 'master'
+
+    wrappers:
+      - hyperledger-infra-wrappers
+
+    builders:
+      - clean-environment
+      - output-environment
+      - fabric-unit-tests
+
+    publishers:
+      - hyperledger-infra-shiplogs:
+          maven-version: 'mvn33'
+      - code-coverage-report
