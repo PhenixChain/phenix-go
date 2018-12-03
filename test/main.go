@@ -89,12 +89,11 @@ func SendTX() {
 	msg := client.CreateMsg(from, to, coins)
 
 	tb := txbuilder.StdSignMsg{
-		ChainID:       "phenix",
-		AccountNumber: 2,
-		Sequence:      4,
-		Memo:          "",
-		Msgs:          []types.Msg{msg},
-		Fee:           auth.NewStdFee(200000, types.Coin{}),
+		ChainID:  "phenix",
+		Sequence: 4,
+		Memo:     "",
+		Msgs:     []types.Msg{msg},
+		Fee:      auth.NewStdFee(200000, types.Coin{}),
 	}
 	sign, err := buildAndSign(tb)
 	if err != nil {
@@ -123,10 +122,9 @@ func buildAndSign(msg txbuilder.StdSignMsg) ([]byte, error) {
 	pubkey := priv.PubKey()
 
 	sig := auth.StdSignature{
-		AccountNumber: msg.AccountNumber,
-		Sequence:      msg.Sequence,
-		PubKey:        pubkey,
-		Signature:     sigBytes,
+		Sequence:  msg.Sequence,
+		PubKey:    pubkey,
+		Signature: sigBytes,
 	}
 	return Cdc.MarshalJSON(auth.NewStdTx(msg.Msgs, msg.Fee, []auth.StdSignature{sig}, msg.Memo))
 }

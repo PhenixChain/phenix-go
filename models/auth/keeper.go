@@ -42,21 +42,13 @@ func (am AccountKeeper) NewAccountWithAddress(ctx sdk.Context, addr sdk.AccAddre
 		// Handle w/ #870
 		panic(err)
 	}
-	err = acc.SetAccountNumber(am.GetNextAccountNumber(ctx))
-	if err != nil {
-		// Handle w/ #870
-		panic(err)
-	}
+
 	return acc
 }
 
 // New Account
 func (am AccountKeeper) NewAccount(ctx sdk.Context, acc Account) Account {
-	err := acc.SetAccountNumber(am.GetNextAccountNumber(ctx))
-	if err != nil {
-		// TODO: Handle with #870
-		panic(err)
-	}
+
 	return acc
 }
 

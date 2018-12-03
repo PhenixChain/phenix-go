@@ -22,9 +22,6 @@ type Account interface {
 	GetPubKey() crypto.PubKey // can return nil.
 	SetPubKey(crypto.PubKey) error
 
-	GetAccountNumber() int64
-	SetAccountNumber(int64) error
-
 	GetSequence() int64
 	SetSequence(int64) error
 
@@ -46,11 +43,10 @@ var _ Account = (*BaseAccount)(nil)
 // However one doesn't have to use BaseAccount as long as your struct
 // implements Account.
 type BaseAccount struct {
-	Address       sdk.AccAddress `json:"address"`
-	Coins         sdk.Coins      `json:"coins"`
-	PubKey        crypto.PubKey  `json:"public_key"`
-	AccountNumber int64          `json:"account_number"`
-	Sequence      int64          `json:"sequence"`
+	Address  sdk.AccAddress `json:"address"`
+	Coins    sdk.Coins      `json:"coins"`
+	PubKey   crypto.PubKey  `json:"public_key"`
+	Sequence int64          `json:"sequence"`
 }
 
 // Prototype function for BaseAccount
@@ -97,17 +93,6 @@ func (acc *BaseAccount) GetCoins() sdk.Coins {
 // Implements sdk.Account.
 func (acc *BaseAccount) SetCoins(coins sdk.Coins) error {
 	acc.Coins = coins
-	return nil
-}
-
-// Implements Account
-func (acc *BaseAccount) GetAccountNumber() int64 {
-	return acc.AccountNumber
-}
-
-// Implements Account
-func (acc *BaseAccount) SetAccountNumber(accNumber int64) error {
-	acc.AccountNumber = accNumber
 	return nil
 }
 

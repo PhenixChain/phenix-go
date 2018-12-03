@@ -105,27 +105,25 @@ func (fee StdFee) Bytes() []byte {
 // and the Sequence numbers for each signature (prevent
 // inchain replay and enforce tx ordering per account).
 type StdSignDoc struct {
-	AccountNumber int64             `json:"account_number"`
-	ChainID       string            `json:"chain_id"`
-	Fee           json.RawMessage   `json:"fee"`
-	Memo          string            `json:"memo"`
-	Msgs          []json.RawMessage `json:"msgs"`
-	Sequence      int64             `json:"sequence"`
+	ChainID  string            `json:"chain_id"`
+	Fee      json.RawMessage   `json:"fee"`
+	Memo     string            `json:"memo"`
+	Msgs     []json.RawMessage `json:"msgs"`
+	Sequence int64             `json:"sequence"`
 }
 
 // StdSignBytes returns the bytes to sign for a transaction.
-func StdSignBytes(chainID string, accnum int64, sequence int64, fee StdFee, msgs []sdk.Msg, memo string) []byte {
+func StdSignBytes(chainID string, sequence int64, fee StdFee, msgs []sdk.Msg, memo string) []byte {
 	var msgsBytes []json.RawMessage
 	for _, msg := range msgs {
 		msgsBytes = append(msgsBytes, json.RawMessage(msg.GetSignBytes()))
 	}
 	bz, err := msgCdc.MarshalJSON(StdSignDoc{
-		AccountNumber: accnum,
-		ChainID:       chainID,
-		Fee:           json.RawMessage(fee.Bytes()),
-		Memo:          memo,
-		Msgs:          msgsBytes,
-		Sequence:      sequence,
+		ChainID:  chainID,
+		Fee:      json.RawMessage(fee.Bytes()),
+		Memo:     memo,
+		Msgs:     msgsBytes,
+		Sequence: sequence,
 	})
 	if err != nil {
 		panic(err)
@@ -137,7 +135,6 @@ func StdSignBytes(chainID string, accnum int64, sequence int64, fee StdFee, msgs
 type StdSignature struct {
 	crypto.PubKey `json:"pub_key"` // optional
 	Signature     []byte           `json:"signature"`
-	AccountNumber int64            `json:"account_number"`
 	Sequence      int64            `json:"sequence"`
 }
 

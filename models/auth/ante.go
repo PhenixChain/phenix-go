@@ -152,18 +152,6 @@ func getSignerAccs(ctx sdk.Context, am AccountKeeper, addrs []sdk.AccAddress) (a
 
 func validateAccNumAndSequence(ctx sdk.Context, accs []Account, sigs []StdSignature) sdk.Result {
 	for i := 0; i < len(accs); i++ {
-		// On InitChain, make sure account number == 0
-		if ctx.BlockHeight() == 0 && sigs[i].AccountNumber != 0 {
-			return sdk.ErrInvalidSequence(
-				fmt.Sprintf("Invalid account number for BlockHeight == 0. Got %d, expected 0", sigs[i].AccountNumber)).Result()
-		}
-
-		// Check account number.
-		accnum := accs[i].GetAccountNumber()
-		if ctx.BlockHeight() != 0 && accnum != sigs[i].AccountNumber {
-			return sdk.ErrInvalidSequence(
-				fmt.Sprintf("Invalid account number. Got %d, expected %d", sigs[i].AccountNumber, accnum)).Result()
-		}
 
 		// Check sequence number.
 		seq := accs[i].GetSequence()
@@ -305,8 +293,7 @@ func getSignBytesList(chainID string, stdTx StdTx, stdSigs []StdSignature) (sign
 	signatureBytesList = make([][]byte, len(stdSigs))
 	for i := 0; i < len(stdSigs); i++ {
 		signatureBytesList[i] = StdSignBytes(chainID,
-			stdSigs[i].AccountNumber, stdSigs[i].Sequence,
-			stdTx.Fee, stdTx.Msgs, stdTx.Memo)
+			stdSigs[i].Sequence, stdTx.Fee, stdTx.Msgs, stdTx.Memo)
 	}
 	return
 }
