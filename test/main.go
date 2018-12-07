@@ -1,9 +1,13 @@
 /* package main
 
 import (
+	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 
 	"github.com/PhenixChain/phenix-go/models/auth"
 	"github.com/PhenixChain/phenix-go/models/bank"
@@ -28,12 +32,12 @@ func init() {
 }
 
 func main() {
-	GenKey()
-	SendTX()
+	genKey()
+	sendTX()
+	getAccount()
 }
 
-// GenKey ...
-func GenKey() {
+func genKey() {
 	entropy, err := bip39.NewEntropy(256)
 	if err != nil {
 		log.Fatalln(err)
@@ -58,18 +62,34 @@ func GenKey() {
 	PubKey, _ := bech32.ConvertAndEncode("pub", pubk.Bytes())
 	fmt.Println("Address:"+Addr, "PublicKey:"+PubKey)
 
-	//_, bz, err := bech32.DecodeAndConvert(Addr)
-	//hexPubKey := append([]byte("account:"), bz...)
-	//if err != nil {
-	//log.Fatalln(err)
-	//}
-	//fmt.Println("Hex PublicKey:" + hex.EncodeToString(hexPubKey))
-
 	fmt.Println("Mnemonic:" + mnemonic)
 }
 
-// SendTX ...
-func SendTX() {
+func getAccount() {
+	_, bz, err := bech32.DecodeAndConvert("adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw")
+	hexPubKey := append([]byte("account:"), bz...)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	//fmt.Println("Hex PublicKey:" + hex.EncodeToString(hexPubKey))
+
+	url := `http://120.132.120.245/abci_query?path="/store/acc/key"&data=0x` + hex.EncodeToString(hexPubKey)
+	res := httpGet(url)
+
+	accRes := AccountResponse{}
+	err = json.Unmarshal(res, &accRes)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	br, err := base64.StdEncoding.DecodeString(accRes.Result.Response.Value)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(string(br))
+}
+
+func sendTX() {
 	//fromAdr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
 	fromAdr := "adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw"
 	toAdr := "adr1yrd22rg0hq3wkj4jwv0s8z8xp9fpnah8dd5u59"
@@ -82,7 +102,7 @@ func SendTX() {
 		log.Fatalln(err)
 	}
 
-	coins, err := types.ParseCoins("1coin1")
+	coins, err := types.ParseCoins("800coin1")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -90,7 +110,7 @@ func SendTX() {
 
 	tb := txbuilder.StdSignMsg{
 		ChainID:  "phenix",
-		Sequence: 4,
+		Sequence: 0,
 		Memo:     "",
 		Msgs:     []types.Msg{msg},
 		Fee:      auth.NewStdFee(200000, types.Coin{}),
@@ -100,6 +120,9 @@ func SendTX() {
 		log.Fatalln(err)
 	}
 	fmt.Println(hex.EncodeToString(sign))
+
+	//url := "http://120.132.120.245/broadcast_tx_commit?tx=0x" + hex.EncodeToString(sign)
+	//fmt.Println(string(httpGet(url)))
 }
 
 func buildAndSign(msg txbuilder.StdSignMsg) ([]byte, error) {
@@ -127,5 +150,63 @@ func buildAndSign(msg txbuilder.StdSignMsg) ([]byte, error) {
 		Signature: sigBytes,
 	}
 	return Cdc.MarshalJSON(auth.NewStdTx(msg.Msgs, msg.Fee, []auth.StdSignature{sig}, msg.Memo))
+}
+
+func httpGet(url string) []byte {
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return body
+}
+
+type AccountResponse struct {
+	Result Result
+}
+
+type Result struct {
+	Response Response
+}
+
+type Response struct {
+	Value string `json:"value"`
+}
+
+type TxResponse struct {
+	Value Value
+}
+
+type Value struct {
+	Msg Msg
+}
+
+type Msg struct {
+	Value MsgValue
+}
+
+type MsgValue struct {
+	Inputs Inputs
+}
+
+type Inputs struct {
+	Address string `json:"address"`
+	Coins   Coins
+}
+
+type Outputs struct {
+	Address string `json:"address"`
+	Coins   Coins
+}
+
+type Coins struct {
+	Denom  string `json:"denom"`
+	Amount string `json:"amount"`
 }
 */
