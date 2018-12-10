@@ -11,30 +11,31 @@ import (
 
 	"github.com/PhenixChain/phenix-go/models/auth"
 	"github.com/PhenixChain/phenix-go/models/bank"
-	"github.com/PhenixChain/phenix-go/models/codec"
 	"github.com/PhenixChain/phenix-go/models/types"
 
 	"github.com/PhenixChain/phenix-go/models/auth/txbuilder"
 	"github.com/PhenixChain/phenix-go/models/bank/client"
 	"github.com/PhenixChain/phenix-go/models/crypto/keys/hd"
 	bip39 "github.com/cosmos/go-bip39"
+	amino "github.com/tendermint/go-amino"
+	"github.com/tendermint/tendermint/crypto/encoding/amino"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"github.com/tendermint/tmlibs/bech32"
 )
 
-var Cdc = codec.New()
+var cdc = amino.NewCodec()
 
 func init() {
-	codec.RegisterCrypto(Cdc)
-	types.RegisterCodec(Cdc)
-	bank.RegisterCodec(Cdc)
-	auth.RegisterCodec(Cdc)
+	cryptoAmino.RegisterAmino(cdc)
+	cdc.RegisterInterface((*types.Msg)(nil), nil)
+	cdc.RegisterConcrete(bank.MsgSend{}, "cosmos-sdk/Send", nil)
+	cdc.RegisterConcrete(auth.StdTx{}, "auth/StdTx", nil)
 }
 
 func main() {
-	genKey()
+	//genKey()
 	sendTX()
-	getAccount()
+	//getAccount()
 }
 
 func genKey() {
@@ -149,7 +150,7 @@ func buildAndSign(msg txbuilder.StdSignMsg) ([]byte, error) {
 		PubKey:    pubkey,
 		Signature: sigBytes,
 	}
-	return Cdc.MarshalJSON(auth.NewStdTx(msg.Msgs, msg.Fee, []auth.StdSignature{sig}, msg.Memo))
+	return cdc.MarshalJSON(auth.NewStdTx(msg.Msgs, msg.Fee, []auth.StdSignature{sig}, msg.Memo))
 }
 
 func httpGet(url string) []byte {
