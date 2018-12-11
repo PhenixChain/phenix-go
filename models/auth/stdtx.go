@@ -32,25 +32,6 @@ func NewStdTx(msgs []sdk.Msg, fee StdFee, sigs []StdSignature, memo string) StdT
 //nolint
 func (tx StdTx) GetMsgs() []sdk.Msg { return tx.Msgs }
 
-// GetSigners returns the addresses that must sign the transaction.
-// Addresses are returned in a determistic order.
-// They are accumulated from the GetSigners method for each Msg
-// in the order they appear in tx.GetMsgs().
-// Duplicate addresses will be omitted.
-func (tx StdTx) GetSigners() []sdk.AccAddress {
-	seen := map[string]bool{}
-	var signers []sdk.AccAddress
-	for _, msg := range tx.GetMsgs() {
-		for _, addr := range msg.GetSigners() {
-			if !seen[addr.String()] {
-				signers = append(signers, addr)
-				seen[addr.String()] = true
-			}
-		}
-	}
-	return signers
-}
-
 //nolint
 func (tx StdTx) GetMemo() string { return tx.Memo }
 

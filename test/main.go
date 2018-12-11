@@ -15,7 +15,7 @@ import (
 
 	"github.com/PhenixChain/phenix-go/models/auth/txbuilder"
 	"github.com/PhenixChain/phenix-go/models/bank/client"
-	"github.com/PhenixChain/phenix-go/models/crypto/keys/hd"
+	"github.com/PhenixChain/phenix-go/models/crypto/hd"
 	bip39 "github.com/cosmos/go-bip39"
 	amino "github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/crypto/encoding/amino"
@@ -33,9 +33,9 @@ func init() {
 }
 
 func main() {
-	//genKey()
+	genKey()
 	sendTX()
-	//getAccount()
+	getAccount()
 }
 
 func genKey() {
