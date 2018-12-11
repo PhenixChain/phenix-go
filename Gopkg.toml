@@ -1,26 +1,6 @@
-[[constraint]]
-  name = "github.com/bgentry/speakeasy"
-  version = "~0.1.0"
-
 [[override]]
   name = "github.com/golang/protobuf"
   version = "=1.1.0"
-
-[[constraint]]
-  name = "github.com/mattn/go-isatty"
-  version = "~0.0.3"
-
-[[constraint]]
-  name = "github.com/spf13/cobra"
-  version = "~0.0.1"
-
-[[constraint]]
-  name = "github.com/spf13/viper"
-  version = "~1.0.0"
-
-[[constraint]]
-  name = "github.com/pkg/errors"
-  version = "=0.8.0"
 
 [[override]]
   name = "github.com/tendermint/go-amino"
@@ -40,16 +20,6 @@
 [[constraint]]
   name = "github.com/cosmos/go-bip39"
   revision = "52158e4697b87de16ed390e1bdaf813e581008fa"
-
-[[constraint]]
-  name = "github.com/zondax/ledger-goclient"
-  version = "=v0.1.0"
-
-## transitive deps, with releases:
-
-[[constraint]]
-  name = "github.com/mitchellh/go-homedir"
-  version = "1.0.0"
 
 ## transitive deps, without releases:
 
