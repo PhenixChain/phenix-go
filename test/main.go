@@ -33,9 +33,16 @@ func init() {
 }
 
 func main() {
-	genKey()
-	sendTX()
-	getAccount()
+
+	// 生成公私钥
+	// 发送交易
+	// 查询地址余额
+	// 查询交易(txhash、height)
+
+	//genKey()
+	//sendTX()
+	//getAccount()
+	//getTX()
 }
 
 func genKey() {
@@ -61,9 +68,9 @@ func genKey() {
 		log.Fatalln(err)
 	}
 	PubKey, _ := bech32.ConvertAndEncode("pub", pubk.Bytes())
-	fmt.Println("Address:"+Addr, "PublicKey:"+PubKey)
-
-	fmt.Println("Mnemonic:" + mnemonic)
+	fmt.Println("Address:   " + Addr)
+	fmt.Println("PublicKey: " + PubKey)
+	fmt.Println("Mnemonic:  " + mnemonic)
 }
 
 func getAccount() {
@@ -90,6 +97,23 @@ func getAccount() {
 	fmt.Println(string(br))
 }
 
+func getTX() {
+	url := `http://120.132.120.245/tx?hash=0xBB83B9A3A0D41CF0FAB1933F08CD6FD7000F28CB04AAEAD30FDF70BE466D3714`
+	res := httpGet(url)
+
+	tranRes := TranResponse{}
+	err := json.Unmarshal(res, &tranRes)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	br, err := base64.StdEncoding.DecodeString(tranRes.Result.Tx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(string(br))
+}
+
 func sendTX() {
 	//fromAdr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
 	fromAdr := "adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw"
@@ -103,7 +127,7 @@ func sendTX() {
 		log.Fatalln(err)
 	}
 
-	coins, err := types.ParseCoins("800coin1")
+	coins, err := types.ParseCoins("8888coin1")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -120,14 +144,17 @@ func sendTX() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(hex.EncodeToString(sign))
+	//fmt.Println(hex.EncodeToString(sign))
 
+	//Commit (Waiting for a new block)
 	//url := "http://120.132.120.245/broadcast_tx_commit?tx=0x" + hex.EncodeToString(sign)
-	//fmt.Println(string(httpGet(url)))
+
+	//Propose (Waiting for the proposal result)
+	url := "http://120.132.120.245/broadcast_tx_sync?tx=0x" + hex.EncodeToString(sign)
+	fmt.Println(string(httpGet(url)))
 }
 
 func buildAndSign(msg txbuilder.StdSignMsg) ([]byte, error) {
-
 	//mnemonic := "bounce prevent cross remind lunch pitch project dragon firm stove labor bicycle phrase giggle cliff huge betray mask ecology gloom access alarm yellow tuna"
 	mnemonic := "unfair subway explain reward shrug cement dial junk twin vital badge sing lift chair cage interest rack fault feature original acoustic vote sheriff car"
 	seed := bip39.NewSeed(mnemonic, "")
@@ -166,6 +193,14 @@ func httpGet(url string) []byte {
 	}
 
 	return body
+}
+
+type TranResponse struct {
+	Result TxResult `json:"result"`
+}
+
+type TxResult struct {
+	Tx string `json:"tx"`
 }
 
 type AccountResponse struct {
