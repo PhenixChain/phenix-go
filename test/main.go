@@ -33,16 +33,42 @@ func init() {
 }
 
 func main() {
-
+	//##########################################################
 	// 生成公私钥
-	// 发送交易
-	// 查询地址余额
-	// 查询交易(txhash、height)
-
 	//genKey()
-	//sendTX()
-	//getAccount()
-	//getTX()
+
+	//##########################################################
+	// 转出地址
+	//fromAdr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
+	fromAdr := "adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw"
+
+	// 转入地址
+	toAdr := "adr1yrd22rg0hq3wkj4jwv0s8z8xp9fpnah8dd5u59"
+
+	// 金额币种
+	coin := "6coin1"
+
+	// 转出地址对应的助记词
+	//mnemonic := "bounce prevent cross remind lunch pitch project dragon firm stove labor bicycle phrase giggle cliff huge betray mask ecology gloom access alarm yellow tuna"
+	mnemonic := "unfair subway explain reward shrug cement dial junk twin vital badge sing lift chair cage interest rack fault feature original acoustic vote sheriff car"
+
+	// 交易序号(通过getAccount查询)
+	sequence := int64(0)
+
+	// 发送交易
+	sendTX(fromAdr, toAdr, coin, mnemonic, sequence)
+
+	//##########################################################
+	//addr := "adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw"
+
+	// 查询地址余额
+	//getAccount(addr)
+
+	//##########################################################
+	//tx := "BB83B9A3A0D41CF0FAB1933F08CD6FD7000F28CB04AAEAD30FDF70BE466D3714"
+
+	// 查询交易(txhash、height)
+	//getTX(tx)
 }
 
 func genKey() {
@@ -73,8 +99,8 @@ func genKey() {
 	fmt.Println("Mnemonic:  " + mnemonic)
 }
 
-func getAccount() {
-	_, bz, err := bech32.DecodeAndConvert("adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw")
+func getAccount(addr string) {
+	_, bz, err := bech32.DecodeAndConvert(addr)
 	hexPubKey := append([]byte("account:"), bz...)
 	if err != nil {
 		log.Fatalln(err)
@@ -97,8 +123,8 @@ func getAccount() {
 	fmt.Println(string(br))
 }
 
-func getTX() {
-	url := `http://120.132.120.245/tx?hash=0xBB83B9A3A0D41CF0FAB1933F08CD6FD7000F28CB04AAEAD30FDF70BE466D3714`
+func getTX(tx string) {
+	url := `http://120.132.120.245/tx?hash=0x` + tx
 	res := httpGet(url)
 
 	tranRes := TranResponse{}
@@ -114,10 +140,7 @@ func getTX() {
 	fmt.Println(string(br))
 }
 
-func sendTX() {
-	//fromAdr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
-	fromAdr := "adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw"
-	toAdr := "adr1yrd22rg0hq3wkj4jwv0s8z8xp9fpnah8dd5u59"
+func sendTX(fromAdr, toAdr, coin, mnemonic string, sequence int64) {
 	from, err := types.AccAddressFromBech32(fromAdr)
 	if err != nil {
 		log.Fatalln(err)
@@ -127,7 +150,7 @@ func sendTX() {
 		log.Fatalln(err)
 	}
 
-	coins, err := types.ParseCoins("8888coin1")
+	coins, err := types.ParseCoins(coin)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -135,12 +158,12 @@ func sendTX() {
 
 	tb := txbuilder.StdSignMsg{
 		ChainID:  "phenix",
-		Sequence: 0,
+		Sequence: sequence,
 		Memo:     "",
 		Msgs:     []types.Msg{msg},
 		Fee:      auth.NewStdFee(200000, types.Coin{}),
 	}
-	sign, err := buildAndSign(tb)
+	sign, err := buildAndSign(tb, mnemonic)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -154,9 +177,7 @@ func sendTX() {
 	fmt.Println(string(httpGet(url)))
 }
 
-func buildAndSign(msg txbuilder.StdSignMsg) ([]byte, error) {
-	//mnemonic := "bounce prevent cross remind lunch pitch project dragon firm stove labor bicycle phrase giggle cliff huge betray mask ecology gloom access alarm yellow tuna"
-	mnemonic := "unfair subway explain reward shrug cement dial junk twin vital badge sing lift chair cage interest rack fault feature original acoustic vote sheriff car"
+func buildAndSign(msg txbuilder.StdSignMsg, mnemonic string) ([]byte, error) {
 	seed := bip39.NewSeed(mnemonic, "")
 	masterPriv, ch := hd.ComputeMastersFromSeed(seed)
 	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, "44'/118'/0'/0/0")
