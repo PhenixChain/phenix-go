@@ -12,12 +12,10 @@
 ```
 公钥前缀: pub
 地址前缀: adr
-
-参考:
-[bip39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
+```
+参考: [bip39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
 [bip44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)
 [bech32](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki#Bech32)
-```
 
 ## 查询
 ### 账户
