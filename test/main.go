@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/PhenixChain/phenix-go/models/auth"
 	"github.com/PhenixChain/phenix-go/models/bank"
@@ -33,6 +34,8 @@ func init() {
 }
 
 func main() {
+	startTime := time.Now()
+
 	//##########################################################
 	// 生成公私钥
 	//genKey()
@@ -69,6 +72,9 @@ func main() {
 
 	// 查询交易(txhash、height)
 	//getTX(tx)
+
+	elapsed := time.Since(startTime)
+	fmt.Println("elapsed cost: ", elapsed)
 }
 
 func genKey() {

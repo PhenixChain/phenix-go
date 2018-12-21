@@ -21,12 +21,6 @@
   name = "github.com/cosmos/go-bip39"
   revision = "52158e4697b87de16ed390e1bdaf813e581008fa"
 
-## transitive deps, without releases:
-
-[[override]]
-  name = "github.com/syndtr/goleveldb"
-  revision = "c4c61651e9e37fa117f53c5a906d3b63090d8445"
-
 [prune]
   go-tests = true
   unused-packages = true
