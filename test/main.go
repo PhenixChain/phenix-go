@@ -43,29 +43,29 @@ func main() {
 	//##########################################################
 	// 转出地址
 	//fromAdr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
-	fromAdr := "adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw"
+	//fromAdr := "adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw"
 
 	// 转入地址
-	toAdr := "adr1yrd22rg0hq3wkj4jwv0s8z8xp9fpnah8dd5u59"
+	//toAdr := "adr1yrd22rg0hq3wkj4jwv0s8z8xp9fpnah8dd5u59"
 
 	// 金额币种
-	coin := "6coin1"
+	//coin := "6coin1"
 
 	// 转出地址对应的助记词
 	//mnemonic := "bounce prevent cross remind lunch pitch project dragon firm stove labor bicycle phrase giggle cliff huge betray mask ecology gloom access alarm yellow tuna"
-	mnemonic := "unfair subway explain reward shrug cement dial junk twin vital badge sing lift chair cage interest rack fault feature original acoustic vote sheriff car"
+	//mnemonic := "unfair subway explain reward shrug cement dial junk twin vital badge sing lift chair cage interest rack fault feature original acoustic vote sheriff car"
 
 	// 交易序号(通过getAccount查询)
-	sequence := int64(0)
+	//sequence := int64(1)
 
 	// 发送交易
-	sendTX(fromAdr, toAdr, coin, mnemonic, sequence)
+	//sendTX(fromAdr, toAdr, coin, mnemonic, sequence)
 
 	//##########################################################
-	//addr := "adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw"
+	addr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
 
 	// 查询地址余额
-	//getAccount(addr)
+	getAccount(addr)
 
 	//##########################################################
 	//tx := "BB83B9A3A0D41CF0FAB1933F08CD6FD7000F28CB04AAEAD30FDF70BE466D3714"
@@ -107,7 +107,8 @@ func genKey() {
 
 func getAccount(addr string) {
 	_, bz, err := bech32.DecodeAndConvert(addr)
-	hexPubKey := append([]byte("account:"), bz...)
+	//hexPubKey := append([]byte("account:"), bz...) //v1.1
+	hexPubKey := append([]byte{0x01}, bz...) //v1.2
 	if err != nil {
 		log.Fatalln(err)
 	}
