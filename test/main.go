@@ -1,4 +1,4 @@
-/* package main
+package main
 
 import (
 	"encoding/base64"
@@ -36,42 +36,49 @@ func init() {
 func main() {
 	startTime := time.Now()
 
-	//##########################################################
-	// 生成公私钥
+	//##################### 生成公私钥 #################################################
+
 	//genKey()
 
-	//##########################################################
+	//#####################  发送交易  #################################################
+
 	// 转出地址
-	//fromAdr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
+	fromAdr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
 	//fromAdr := "adr1ttsph4qv93hllu8spl026s0rfmwhfl9d6fenyw"
 
 	// 转入地址
-	//toAdr := "adr1yrd22rg0hq3wkj4jwv0s8z8xp9fpnah8dd5u59"
+	toAdr := "adr1yrd22rg0hq3wkj4jwv0s8z8xp9fpnah8dd5u59"
 
 	// 金额币种
-	//coin := "6coin1"
+	coin := "6coin1"
 
 	// 转出地址对应的助记词
-	//mnemonic := "bounce prevent cross remind lunch pitch project dragon firm stove labor bicycle phrase giggle cliff huge betray mask ecology gloom access alarm yellow tuna"
+	mnemonic := "bounce prevent cross remind lunch pitch project dragon firm stove labor bicycle phrase giggle cliff huge betray mask ecology gloom access alarm yellow tuna"
 	//mnemonic := "unfair subway explain reward shrug cement dial junk twin vital badge sing lift chair cage interest rack fault feature original acoustic vote sheriff car"
 
 	// 交易序号(通过getAccount查询)
-	//sequence := int64(1)
+	sequence := int64(0)
 
-	// 发送交易
-	//sendTX(fromAdr, toAdr, coin, mnemonic, sequence)
+	sendTX(fromAdr, toAdr, coin, mnemonic, sequence)
 
-	//##########################################################
-	addr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
+	//#####################  查询地址余额  #################################################
 
-	// 查询地址余额
-	getAccount(addr)
+	//addr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
 
-	//##########################################################
+	//getAccount(addr)
+
+	//######################   查询交易   #################################################
+
 	//tx := "BB83B9A3A0D41CF0FAB1933F08CD6FD7000F28CB04AAEAD30FDF70BE466D3714"
 
 	// 查询交易(txhash、height)
 	//getTX(tx)
+
+	//####################### 查询地址的txhash ##############################################
+
+	addr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
+
+	getTXByAddr(addr)
 
 	elapsed := time.Since(startTime)
 	fmt.Println("elapsed cost: ", elapsed)
@@ -108,13 +115,36 @@ func genKey() {
 func getAccount(addr string) {
 	_, bz, err := bech32.DecodeAndConvert(addr)
 	//hexPubKey := append([]byte("account:"), bz...) //v1.1
-	hexPubKey := append([]byte{0x01}, bz...) //v1.2
+	hexPubKey := append([]byte{0x01}, bz...) //v1.2+
 	if err != nil {
 		log.Fatalln(err)
 	}
 	//fmt.Println("Hex PublicKey:" + hex.EncodeToString(hexPubKey))
 
 	url := `http://120.132.120.245/abci_query?path="/store/acc/key"&data=0x` + hex.EncodeToString(hexPubKey)
+	res := httpGet(url)
+
+	accRes := AccountResponse{}
+	err = json.Unmarshal(res, &accRes)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	br, err := base64.StdEncoding.DecodeString(accRes.Result.Response.Value)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(string(br))
+}
+
+func getTXByAddr(addr string) {
+	_, bz, err := bech32.DecodeAndConvert(addr)
+	hexPubKey := append([]byte{0x01}, bz...) //v1.2+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	url := `http://120.132.120.245/abci_query?path="/store/address/key"&data=0x` + hex.EncodeToString(hexPubKey)
 	res := httpGet(url)
 
 	accRes := AccountResponse{}
@@ -273,4 +303,3 @@ type Coins struct {
 	Denom  string `json:"denom"`
 	Amount string `json:"amount"`
 }
-*/
