@@ -20,20 +20,20 @@
 ## 查询
 ### 账户
 ```
-http://120.132.120.245/abci_query?path="/store/acc/key"&data=<Address HexString>
+http://127.0.0.1:26657/abci_query?path="/store/acc/key"&data=<Address HexString>
 Address HexString 如: 0x01524c0ddd8582f3f6ac04b5a5b56760f9f204b1da
 ```
 ### 交易
 ```
-http://120.132.120.245/tx?hash=<TX HASH>
+http://127.0.0.1:26657/tx?hash=<TX HASH>
 TX HASH 如: 0xBB83B9A3A0D41CF0FAB1933F08CD6FD7000F28CB04AAEAD30FDF70BE466D3714
 
-http://120.132.120.245/abci_query?path="/store/address/key"&data=<Address HexString>
+http://127.0.0.1:26657/abci_query?path="/store/address/key"&data=<Address HexString>
 Address HexString 如: 0x01524c0ddd8582f3f6ac04b5a5b56760f9f204b1da
 ```
 
 ## 广播
 ### 交易
 ```
-http://120.132.120.245/broadcast_tx_sync?tx=<Hex SignData>
+http://127.0.0.1:26657/broadcast_tx_sync?tx=<Hex SignData>
 ```
