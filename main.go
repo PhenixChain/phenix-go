@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/PhenixChain/phenix-go/models/auth"
@@ -15,7 +16,6 @@ import (
 	"github.com/PhenixChain/phenix-go/models/types"
 
 	"github.com/PhenixChain/phenix-go/models/auth/txbuilder"
-	"github.com/PhenixChain/phenix-go/models/bank/client"
 	"github.com/PhenixChain/phenix-go/models/crypto/hd"
 	bip39 "github.com/cosmos/go-bip39"
 	amino "github.com/tendermint/go-amino"
@@ -56,8 +56,11 @@ func main() {
 	mnemonic := "bounce prevent cross remind lunch pitch project dragon firm stove labor bicycle phrase giggle cliff huge betray mask ecology gloom access alarm yellow tuna"
 	//mnemonic := "unfair subway explain reward shrug cement dial junk twin vital badge sing lift chair cage interest rack fault feature original acoustic vote sheriff car"
 
-	// 交易序号(通过getAccount查询)
+	// 交易序号
 	sequence := int64(0)
+	if seq := getAccount(fromAdr, true); seq != "" {
+		sequence, _ = strconv.ParseInt(seq, 10, 64)
+	}
 
 	sendTX(fromAdr, toAdr, coin, mnemonic, sequence)
 
@@ -65,20 +68,20 @@ func main() {
 
 	//addr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
 
-	//getAccount(addr)
+	//getAccount(addr, true)
 
 	//######################   查询交易   #################################################
 
-	//tx := "BB83B9A3A0D41CF0FAB1933F08CD6FD7000F28CB04AAEAD30FDF70BE466D3714"
+	//tx := "23ECD5198818D03B6568257F1BA29BD4DC0668CAD95CD6472C14C7E09AF6AAD3"
 
 	// 查询交易(txhash、height)
 	//getTX(tx)
 
 	//####################### 查询地址的txhash ##############################################
 
-	addr := "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
+	//addr = "adr12fxqmhv9steldtqykkjm2emql8eqfvw6am76xj"
 
-	getTXByAddr(addr)
+	//getTXByAddr(addr)
 
 	elapsed := time.Since(startTime)
 	fmt.Println("elapsed cost: ", elapsed)
@@ -112,7 +115,7 @@ func genKey() {
 	fmt.Println("Mnemonic:  " + mnemonic)
 }
 
-func getAccount(addr string) {
+func getAccount(addr string, show bool) string {
 	_, bz, err := bech32.DecodeAndConvert(addr)
 	//hexPubKey := append([]byte("account:"), bz...) //v1.1
 	hexPubKey := append([]byte{0x01}, bz...) //v1.2+
@@ -121,7 +124,7 @@ func getAccount(addr string) {
 	}
 	//fmt.Println("Hex PublicKey:" + hex.EncodeToString(hexPubKey))
 
-	url := `http://120.132.120.245/abci_query?path="/store/acc/key"&data=0x` + hex.EncodeToString(hexPubKey)
+	url := `http://127.0.0.1:26657/abci_query?path="/store/acc/key"&data=0x` + hex.EncodeToString(hexPubKey)
 	res := httpGet(url)
 
 	accRes := AccountResponse{}
@@ -129,12 +132,26 @@ func getAccount(addr string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	if accRes.Result.Response.Value != "" {
+		br, err := base64.StdEncoding.DecodeString(accRes.Result.Response.Value)
+		if err != nil {
+			log.Fatalln(err)
+		}
 
-	br, err := base64.StdEncoding.DecodeString(accRes.Result.Response.Value)
-	if err != nil {
-		log.Fatalln(err)
+		accInfo := AccountInfo{}
+		err = json.Unmarshal(br, &accInfo)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if show {
+			fmt.Println(string(br))
+		}
+
+		return accInfo.Value.Sequence
 	}
-	fmt.Println(string(br))
+
+	return ""
 }
 
 func getTXByAddr(addr string) {
@@ -144,7 +161,7 @@ func getTXByAddr(addr string) {
 		log.Fatalln(err)
 	}
 
-	url := `http://120.132.120.245/abci_query?path="/store/address/key"&data=0x` + hex.EncodeToString(hexPubKey)
+	url := `http://127.0.0.1:26657/abci_query?path="/store/address/key"&data=0x` + hex.EncodeToString(hexPubKey)
 	res := httpGet(url)
 
 	accRes := AccountResponse{}
@@ -161,7 +178,7 @@ func getTXByAddr(addr string) {
 }
 
 func getTX(tx string) {
-	url := `http://120.132.120.245/tx?hash=0x` + tx
+	url := `http://127.0.0.1:26657/tx?hash=0x` + tx
 	res := httpGet(url)
 
 	tranRes := TranResponse{}
@@ -191,7 +208,7 @@ func sendTX(fromAdr, toAdr, coin, mnemonic string, sequence int64) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	msg := client.CreateMsg(from, to, coins)
+	msg := bank.NewMsgSend(from, to, coins)
 
 	tb := txbuilder.StdSignMsg{
 		ChainID:  "phenix",
@@ -207,10 +224,10 @@ func sendTX(fromAdr, toAdr, coin, mnemonic string, sequence int64) {
 	//fmt.Println(hex.EncodeToString(sign))
 
 	//Commit (Waiting for a new block)
-	//url := "http://120.132.120.245/broadcast_tx_commit?tx=0x" + hex.EncodeToString(sign)
+	//url := "http://127.0.0.1:26657/broadcast_tx_commit?tx=0x" + hex.EncodeToString(sign)
 
 	//Propose (Waiting for the proposal result)
-	url := "http://120.132.120.245/broadcast_tx_sync?tx=0x" + hex.EncodeToString(sign)
+	url := "http://127.0.0.1:26657/broadcast_tx_sync?tx=0x" + hex.EncodeToString(sign)
 	fmt.Println(string(httpGet(url)))
 }
 
@@ -273,30 +290,14 @@ type Response struct {
 	Value string `json:"value"`
 }
 
-type TxResponse struct {
+type AccountInfo struct {
 	Value Value
 }
 
 type Value struct {
-	Msg Msg
-}
-
-type Msg struct {
-	Value MsgValue
-}
-
-type MsgValue struct {
-	Inputs Inputs
-}
-
-type Inputs struct {
-	Address string `json:"address"`
-	Coins   Coins
-}
-
-type Outputs struct {
-	Address string `json:"address"`
-	Coins   Coins
+	Address  string `json:"address"`
+	Coins    []Coins
+	Sequence string `json:"sequence"`
 }
 
 type Coins struct {
