@@ -1,4 +1,5 @@
 # Go library for easy usage of PhenixChain
+[![Build Status](https://travis-ci.org/PhenixChain/phenix-go.svg?branch=dev)](https://travis-ci.org/PhenixChain/phenix-go)
 
 # API
 * [创建账户](#创建账户)  

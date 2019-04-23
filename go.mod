@@ -26,10 +26,8 @@ require (
 	github.com/spf13/cobra v0.0.3 // indirect
 	github.com/spf13/viper v1.3.1 // indirect
 	github.com/syndtr/goleveldb v0.0.0-20181128100959-b001fa50d6b2 // indirect
-	github.com/tendermint/btcd v0.1.0 // indirect
 	github.com/tendermint/go-amino v0.14.1
-	github.com/tendermint/tendermint v0.26.4
-	github.com/tendermint/tmlibs v0.9.0
+	github.com/tendermint/tendermint v0.31.5
 	golang.org/x/sys v0.0.0-20181220204120-b00e65af1da0 // indirect
 	google.golang.org/genproto v0.0.0-20181221010529-a1fde7408246 // indirect
 	google.golang.org/grpc v1.17.0 // indirect

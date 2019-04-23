@@ -52,10 +52,10 @@ func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 // which must be above some miminum to be accepted into the mempool.
 type StdFee struct {
 	Amount sdk.Coins `json:"amount"`
-	Gas    int64     `json:"gas"`
+	Gas    uint64    `json:"gas"`
 }
 
-func NewStdFee(gas int64, amount ...sdk.Coin) StdFee {
+func NewStdFee(gas uint64, amount sdk.Coins) StdFee {
 	return StdFee{
 		Amount: amount,
 		Gas:    gas,
@@ -69,7 +69,7 @@ func (fee StdFee) Bytes() []byte {
 	// (in the lcd_test, client side its null,
 	// server side its [])
 	if len(fee.Amount) == 0 {
-		fee.Amount = sdk.Coins{}
+		fee.Amount = sdk.NewCoins()
 	}
 	bz, err := msgCdc.MarshalJSON(fee) // TODO
 	if err != nil {
@@ -90,11 +90,11 @@ type StdSignDoc struct {
 	Fee      json.RawMessage   `json:"fee"`
 	Memo     string            `json:"memo"`
 	Msgs     []json.RawMessage `json:"msgs"`
-	Sequence int64             `json:"sequence"`
+	Sequence uint64            `json:"sequence"`
 }
 
 // StdSignBytes returns the bytes to sign for a transaction.
-func StdSignBytes(chainID string, sequence int64, fee StdFee, msgs []sdk.Msg, memo string) []byte {
+func StdSignBytes(chainID string, sequence uint64, fee StdFee, msgs []sdk.Msg, memo string) []byte {
 	var msgsBytes []json.RawMessage
 	for _, msg := range msgs {
 		msgsBytes = append(msgsBytes, json.RawMessage(msg.GetSignBytes()))
@@ -109,6 +109,7 @@ func StdSignBytes(chainID string, sequence int64, fee StdFee, msgs []sdk.Msg, me
 	if err != nil {
 		panic(err)
 	}
+
 	return sdk.MustSortJSON(bz)
 }
 
@@ -116,7 +117,6 @@ func StdSignBytes(chainID string, sequence int64, fee StdFee, msgs []sdk.Msg, me
 type StdSignature struct {
 	crypto.PubKey `json:"pub_key"` // optional
 	Signature     []byte           `json:"signature"`
-	Sequence      int64            `json:"sequence"`
 }
 
 // logic for standard transaction decoding

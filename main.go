@@ -19,9 +19,9 @@ import (
 	"github.com/PhenixChain/phenix-go/models/crypto/hd"
 	bip39 "github.com/cosmos/go-bip39"
 	amino "github.com/tendermint/go-amino"
-	"github.com/tendermint/tendermint/crypto/encoding/amino"
+	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
-	"github.com/tendermint/tmlibs/bech32"
+	"github.com/tendermint/tendermint/libs/bech32"
 )
 
 var cdc = amino.NewCodec()
@@ -29,7 +29,7 @@ var cdc = amino.NewCodec()
 func init() {
 	cryptoAmino.RegisterAmino(cdc)
 	cdc.RegisterInterface((*types.Msg)(nil), nil)
-	cdc.RegisterConcrete(bank.MsgSend{}, "cosmos-sdk/Send", nil)
+	cdc.RegisterConcrete(bank.MsgSend{}, "cosmos-sdk/MsgSend", nil)
 	cdc.RegisterConcrete(auth.StdTx{}, "auth/StdTx", nil)
 }
 
@@ -57,9 +57,9 @@ func main() {
 	//mnemonic := "unfair subway explain reward shrug cement dial junk twin vital badge sing lift chair cage interest rack fault feature original acoustic vote sheriff car"
 
 	// 交易序号
-	sequence := int64(0)
-	if seq := getAccount(fromAdr, true); seq != "" {
-		sequence, _ = strconv.ParseInt(seq, 10, 64)
+	sequence := uint64(0)
+	if seq := getAccount(fromAdr, false); seq != "" {
+		sequence, _ = strconv.ParseUint(seq, 10, 64)
 	}
 
 	sendTX(fromAdr, toAdr, coin, mnemonic, sequence)
@@ -110,6 +110,7 @@ func genKey() {
 		log.Fatalln(err)
 	}
 	PubKey, _ := bech32.ConvertAndEncode("pub", pubk.Bytes())
+
 	fmt.Println("Address:   " + Addr)
 	fmt.Println("PublicKey: " + PubKey)
 	fmt.Println("Mnemonic:  " + mnemonic)
@@ -194,7 +195,7 @@ func getTX(tx string) {
 	fmt.Println(string(br))
 }
 
-func sendTX(fromAdr, toAdr, coin, mnemonic string, sequence int64) {
+func sendTX(fromAdr, toAdr, coin, mnemonic string, sequence uint64) {
 	from, err := types.AccAddressFromBech32(fromAdr)
 	if err != nil {
 		log.Fatalln(err)
@@ -210,13 +211,21 @@ func sendTX(fromAdr, toAdr, coin, mnemonic string, sequence int64) {
 	}
 	msg := bank.NewMsgSend(from, to, coins)
 
+	fees, err := types.ParseCoins("1coin1")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	//fees = []types.Coin{}
+
 	tb := txbuilder.StdSignMsg{
 		ChainID:  "phenix",
 		Sequence: sequence,
 		Memo:     "",
 		Msgs:     []types.Msg{msg},
-		Fee:      auth.NewStdFee(200000, types.Coin{}),
+		Fee:      auth.NewStdFee(200000, fees),
 	}
+
 	sign, err := buildAndSign(tb, mnemonic)
 	if err != nil {
 		log.Fatalln(err)
@@ -240,7 +249,6 @@ func buildAndSign(msg txbuilder.StdSignMsg, mnemonic string) ([]byte, error) {
 	}
 
 	priv := secp256k1.PrivKeySecp256k1(derivedPriv)
-
 	sigBytes, err := priv.Sign(msg.Bytes())
 	if err != nil {
 		log.Fatalln(err)
@@ -248,11 +256,18 @@ func buildAndSign(msg txbuilder.StdSignMsg, mnemonic string) ([]byte, error) {
 	pubkey := priv.PubKey()
 
 	sig := auth.StdSignature{
-		Sequence:  msg.Sequence,
 		PubKey:    pubkey,
 		Signature: sigBytes,
 	}
-	return cdc.MarshalJSON(auth.NewStdTx(msg.Msgs, msg.Fee, []auth.StdSignature{sig}, msg.Memo))
+
+	tx := auth.StdTx{
+		Msgs:       msg.Msgs,
+		Fee:        msg.Fee,
+		Signatures: []auth.StdSignature{sig},
+		Memo:       msg.Memo,
+	}
+
+	return cdc.MarshalJSON(tx)
 }
 
 func httpGet(url string) []byte {

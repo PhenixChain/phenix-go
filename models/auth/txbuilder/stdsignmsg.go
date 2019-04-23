@@ -10,7 +10,7 @@ import (
 // it is signed. For use in the CLI.
 type StdSignMsg struct {
 	ChainID  string      `json:"chain_id"`
-	Sequence int64       `json:"sequence"`
+	Sequence uint64      `json:"sequence"`
 	Fee      auth.StdFee `json:"fee"`
 	Msgs     []sdk.Msg   `json:"msgs"`
 	Memo     string      `json:"memo"`
