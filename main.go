@@ -213,9 +213,9 @@ func sendTX(fromAdr, toAdr, coin, mnemonic string, sequence uint64) {
 	//<!-- < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < << < < ☺
 	//v                  ✰  交易费处理 ✰
 	//v
-	//v    	交易费上限 fees = ceil(gas * gasPrices)
+	//v		交易费上限 fees = ceil(gas * gasPrices)
 	//v		如：gas Limit = 200000; gas Prices = 5Micro
-	//v		fees = 200000*5*(-10^6)
+	//v		fees = 200000*(5*10^6)
 	//v
 	//v		gas是衡量交易需要消耗多少资源的单位
 	//v		gas上限用--gas指定(推荐将gas上限设置为200000)。gas上限太小时，不够交易需要的gas
