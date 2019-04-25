@@ -204,19 +204,47 @@ func sendTX(fromAdr, toAdr, coin, mnemonic string, sequence uint64) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	coins, err := types.ParseCoins(coin)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	msg := bank.NewMsgSend(from, to, coins)
 
+	//<!-- < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < << < < ☺
+	//v                  ✰  交易费处理 ✰
+	//v
+	//v    	交易费上限 fees = ceil(gas * gasPrices)
+	//v		如：gas Limit = 200000; gas Prices = 5Micro
+	//v		fees = 200000*5*(-10^6)
+	//v
+	//v		gas是衡量交易需要消耗多少资源的单位
+	//v		gas上限用--gas指定(推荐将gas上限设置为200000)。gas上限太小时，不够交易需要的gas
+	//v		实际消耗多少gas就会花多少相应的交易费，剩余的交易费会被退还
+	//v
+	//v		1 coin1 = 10^3 coin1-milli
+	//v		Milli = "milli"
+	//v
+	//v		1 coin1 = 10^6 coin1-micro
+	//v		Micro = "micro"
+	//v
+	//v		1 coin1 = 10^9 coin1-nano
+	//v		Nano = "nano"
+	//v
+	//v		1 coin1 = 10^12 coin1-pico
+	//v		Pico = "pico"
+	//v
+	//v		1 coin1 = 10^15 coin1-femto
+	//v		Femto = "femto"
+	//v
+	//v		1 coin1 = 10^18 coin1-atto
+	//v		Atto = "atto"
+	//v
+	//☺ > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >  -->
+
 	fees, err := types.ParseCoins("1coin1")
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	//fees = []types.Coin{}
 
 	tb := txbuilder.StdSignMsg{
 		ChainID:  "phenix",
